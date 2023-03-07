@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 30
+    },
+    "auditLog": "/home/brix/Repos/Ts-Express-Template/logs/debug/.89a339c0d5b6e5cfbd42bcf576ca5823ca259bcb-audit.json",
+    "files": [
+        {
+            "date": 1678180849479,
+            "name": "/home/brix/Repos/Ts-Express-Template/logs/debug/2023-03-07.log",
+            "hash": "15baf959fde34f46be0934e0ff71f06d0920fe54dc0f0ab9d48fbf107e995ce9"
+        }
+    ],
+    "hashType": "sha256"
+}

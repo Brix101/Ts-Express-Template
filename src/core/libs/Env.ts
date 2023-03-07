@@ -10,6 +10,11 @@ let envSchema = z.object({
   LOG_FORMAT: z.string().nullish().default("dev"),
   SECRET_KEY: z.string(),
   ORIGIN: z.string(),
+  POSTGRES_HOST: z.string(),
+  POSTGRES_PORT: z.string(),
+  POSTGRES_USERNAME: z.string(),
+  POSTGRES_PASSWORD: z.string(),
+  POSTGRES_DB: z.string(),
 });
 
 let _serverEnv = envSchema.safeParse(process.env);
