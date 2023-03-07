@@ -1,6 +1,4 @@
-.idea/
-.vscode/
-node_modules/
-build/
-tmp/
-temp/
+node_modules
+package-lock.json
+logs/*
+!logs/.gitkeep
