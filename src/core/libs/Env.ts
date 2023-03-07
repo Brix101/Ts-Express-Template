@@ -7,7 +7,7 @@ let envSchema = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "test", "production"]),
   PORT: z.string().default("5000"),
-  LOG_FORMAT: z.string().nullish().default("dev"),
+  LOG_FORMAT: z.string().default("dev"),
   SECRET_KEY: z.string(),
   ORIGIN: z.string(),
   POSTGRES_HOST: z.string(),

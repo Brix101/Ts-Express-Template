@@ -28,7 +28,7 @@ function print(path: string[], layer: Layer) {
     );
   } else if (layer.method) {
     logger.warn(
-      `[${layer.method.toUpperCase()}]  /${path
+      `➡️[${layer.method.toUpperCase()}]  /${path
         .concat(split(layer.regexp))
         .filter(Boolean)
         .join("/")}`

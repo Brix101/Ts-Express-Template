@@ -31,7 +31,7 @@ class App {
     AppDataSource.initialize()
       .then(() => {
         // here you can start to work with your database
-        logger.info(`📦 Database initialized`);
+        logger.info(`📦⚡⚡⚡ Database initialized`);
         this.app.listen(this.port, () => {
           logger.info(`=================================`);
           logger.info(`======= ENV: ${this.env} =======`);
