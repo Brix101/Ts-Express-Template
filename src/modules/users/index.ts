@@ -16,6 +16,12 @@ class IndexRoutes implements Routes {
     this.router.get(`${this.path}`, (req, res) => {
       res.send("hello users");
     });
+    this.router.delete(`${this.path}/:id`, (req, res) => {
+      res.send("hello post users");
+    });
+    this.router.put(`${this.path}/:id`, (req, res) => {
+      res.send("hello users");
+    });
   }
 }
 

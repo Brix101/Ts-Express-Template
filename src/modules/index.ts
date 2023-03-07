@@ -17,6 +17,6 @@ const modules = Promise.all(
       }
     })
     .filter(Boolean)
-);
+) as Promise<Routes[]>;
 
 export default modules;

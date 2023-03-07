@@ -10,6 +10,7 @@ import { stream, logger } from "@/corelibs/Logger";
 import errorMiddleware from "@/coremiddlewares/error.middleware";
 import { AppDataSource } from "@/corelibs/Database";
 import { Routes } from "@/modules/routes.interface";
+import { print } from "@/corelibs/RegisteredRoutesLogger";
 
 class App {
   public app: express.Application;
@@ -35,6 +36,10 @@ class App {
           logger.info(`=================================`);
           logger.info(`======= ENV: ${this.env} =======`);
           logger.info(`🚀 App listening on the port ${this.port}`);
+          logger.info(`=================================`);
+          // Log all registerd routes
+          logger.info(`======= REGISTERED ROUTES =======`);
+          this.app._router.stack.forEach(print.bind(null, []));
           logger.info(`=================================`);
         });
       })
