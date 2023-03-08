@@ -1,4 +1,5 @@
-import { readdirSync } from "fs";
+import { readdirSync, readdir } from "fs";
+import path from "path";
 import { Routes } from "./routes.interface";
 
 const PATH_ROUTER = `${__dirname}`;
@@ -9,14 +10,21 @@ const PATH_ROUTER = `${__dirname}`;
  */
 const modules = Promise.all(
   readdirSync(PATH_ROUTER)
-    .map((fileName) => {
+    .filter((fileName) => {
       if (!fileName.includes(".ts")) {
-        return import(`./${fileName}`).then((PathRoutes) => {
-          return new PathRoutes.default() as Routes;
-        });
+        return Boolean(
+          readdirSync(path.join(PATH_ROUTER, fileName)).find(
+            (files) => files === "index.ts"
+          )
+        );
       }
+      return false;
     })
-    .filter(Boolean)
+    .map(async (fileName) => {
+      return import(`./${fileName}`).then((PathRoutes) => {
+        return new PathRoutes.default() as Routes;
+      });
+    })
 ) as Promise<Routes[]>;
 
 export default modules;

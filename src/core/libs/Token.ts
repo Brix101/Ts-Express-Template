@@ -21,8 +21,8 @@ export function generateJWT(payload: Partial<User>): string {
 
 export function verifyToken(token: string): Partial<User> | undefined {
   try {
-    const user = <jwt.JwtPayload>jwt.verify(token, env.PUBLIC_KEY);
-    return user.payload;
+    const { payload } = <jwt.JwtPayload>jwt.verify(token, env.PUBLIC_KEY);
+    return payload;
   } catch (e: any) {
     return undefined;
   }

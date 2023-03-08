@@ -9,7 +9,7 @@ import { StatusCodes } from "http-status-codes";
 import { Routes } from "../routes.interface";
 import { LoginBody } from "./auth.schema";
 
-class IndexRoutes implements Routes {
+class AuthRoutes implements Routes {
   public path = "/auth";
   public router = Router();
 
@@ -83,4 +83,4 @@ class IndexRoutes implements Routes {
   }
 }
 
-export default IndexRoutes;
+export default AuthRoutes;

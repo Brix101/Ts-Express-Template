@@ -9,7 +9,7 @@ import { processRequestBody } from "zod-express-middleware";
 import { exclude } from "@/core/libs/PrismaExclude";
 import requireUser from "@/core/middlewares/requiredUser.middleware";
 
-class IndexRoutes implements Routes {
+class UserRoutes implements Routes {
   public path = "/users";
   public router = Router();
 
@@ -127,4 +127,4 @@ class IndexRoutes implements Routes {
   }
 }
 
-export default IndexRoutes;
+export default UserRoutes;

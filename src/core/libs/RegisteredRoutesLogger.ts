@@ -17,6 +17,7 @@ interface Thing {
   fast_slash: boolean;
 }
 
+let oldPath = "";
 function print(path: string[], layer: Layer) {
   if (layer.route) {
     layer.route.stack.forEach(
@@ -27,12 +28,17 @@ function print(path: string[], layer: Layer) {
       print.bind(null, path.concat(split(layer.regexp)))
     );
   } else if (layer.method) {
-    logger.warn(
-      `➡️[${layer.method.toUpperCase()}]  /${path
-        .concat(split(layer.regexp))
-        .filter(Boolean)
-        .join("/")}`
-    );
+    const joinedPath = path
+      .concat(split(layer.regexp))
+      .filter(Boolean)
+      .join("/");
+    const method = layer.method.toUpperCase();
+    const newPath = method + joinedPath;
+
+    if (oldPath !== newPath) {
+      logger.warn(`➡️[${method}]  /${joinedPath}`);
+      oldPath = newPath;
+    }
   }
 }
 
