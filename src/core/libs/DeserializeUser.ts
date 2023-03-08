@@ -3,16 +3,18 @@ import { get } from "lodash";
 import { verifyToken } from "./Token";
 
 export function deserializeUser(req: Request, _: Response, next: NextFunction) {
-  const accessToken = get(req, "headers.authorization", "").replace(
-    /^Bearer\s/,
-    ""
-  );
+  const Authorization =
+    req.cookies["Authorization"] ||
+    (req.header("Authorization")
+      ? get(req, "headers.authorization", "").replace(/^Bearer\s/, "")
+      : null);
+
   //Todo emplement access & refresh token
-  if (!accessToken) {
+  if (!Authorization) {
     return next();
   }
 
-  const user = verifyToken(accessToken);
+  const user = verifyToken(Authorization);
 
   if (user) {
     req.user = user;

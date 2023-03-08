@@ -3,14 +3,15 @@ import { logger } from "@/core/libs/Logger";
 import { exclude } from "@/core/libs/PrismaExclude";
 import { generateJWT } from "@/core/libs/Token";
 import requireUser from "@/core/middlewares/requiredUser.middleware";
-import { User } from "@prisma/client";
-import { Router, Request, Response } from "express";
+import { Prisma, User } from "@prisma/client";
+import { CookieOptions, Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
+import { processRequestBody } from "zod-express-middleware";
 import { Routes } from "../routes.interface";
-import { LoginBody } from "./auth.schema";
+import { SignInBody, SignUpBody, signUpSchema } from "./auth.schema";
 
 class AuthRoutes implements Routes {
-  public path = "/auth";
+  public path = "/";
   public router = Router();
 
   constructor() {
@@ -19,8 +20,8 @@ class AuthRoutes implements Routes {
 
   private initializeRoutes() {
     this.router.post(
-      `${this.path}/login`,
-      async (req: Request<{}, {}, LoginBody>, res: Response) => {
+      `${this.path}signin`,
+      async (req: Request<{}, {}, SignInBody>, res: Response) => {
         try {
           const { email, password } = req.body;
           const user = await req.prisma?.user.findUnique({
@@ -48,10 +49,13 @@ class AuthRoutes implements Routes {
             ]);
 
             const token = generateJWT(partialUser);
+            let options: CookieOptions = {
+              maxAge: 1000 * 60 * 60 * 24, // would expire after 1 day
+              httpOnly: true, // The cookie only accessible by the web server
+            };
 
-            return res
-              .status(StatusCodes.OK)
-              .json({ ...partialUser, token: token });
+            res.cookie("Authorization", token, options);
+            return res.status(StatusCodes.OK).json({ ...partialUser });
           } else {
             return res
               .status(StatusCodes.NOT_FOUND)
@@ -65,8 +69,43 @@ class AuthRoutes implements Routes {
         }
       }
     );
+    this.router.post(
+      `${this.path}signup`,
+      processRequestBody(signUpSchema.body),
+      async (req: Request<{}, {}, SignUpBody>, res: Response) => {
+        try {
+          const { name, email, password } = req.body;
+          const newUser = await req.prisma?.user.create({
+            data: {
+              name,
+              email,
+              password: await Argon.encrypt(password),
+            },
+          });
+
+          const user = exclude<User, keyof User>(newUser as User, [
+            "password",
+            "deletedAt",
+          ]);
+
+          return res.status(StatusCodes.CREATED).json(user);
+        } catch (error) {
+          logger.error(error);
+          if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === "P2002") {
+              return res
+                .status(StatusCodes.CONFLICT)
+                .json({ message: "User using this email already exists" });
+            }
+          }
+          return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ msg: "Something went wrong" });
+        }
+      }
+    );
     this.router.get(
-      `${this.path}/user`,
+      `${this.path}me`,
       requireUser,
       async (req: Request, res: Response) => {
         try {

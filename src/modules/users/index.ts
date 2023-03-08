@@ -1,18 +1,13 @@
 import { Argon } from "@/core/libs/Argon";
 import { logger } from "@/core/libs/Logger";
-import { Router, Request, Response } from "express";
-import { Routes } from "../routes.interface";
-import { Prisma, User } from "@prisma/client";
-import {
-  RegisterUserBody,
-  registerUserSchema,
-  UpdateUserBody,
-  updateUserSchema,
-} from "./users.schema";
-import { StatusCodes } from "http-status-codes";
-import { processRequestBody } from "zod-express-middleware";
 import { exclude } from "@/core/libs/PrismaExclude";
 import requireUser from "@/core/middlewares/requiredUser.middleware";
+import { User } from "@prisma/client";
+import { Request, Response, Router } from "express";
+import { StatusCodes } from "http-status-codes";
+import { processRequestBody } from "zod-express-middleware";
+import { Routes } from "../routes.interface";
+import { UpdateUserBody, updateUserSchema } from "./users.schema";
 
 class UserRoutes implements Routes {
   public path = "/users";
@@ -38,41 +33,7 @@ class UserRoutes implements Routes {
         }
       }
     );
-    this.router.post(
-      `${this.path}`,
-      processRequestBody(registerUserSchema.body),
-      async (req: Request<{}, {}, RegisterUserBody>, res: Response) => {
-        try {
-          const { name, email, password } = req.body;
-          const newUser = await req.prisma?.user.create({
-            data: {
-              name,
-              email,
-              password: await Argon.encrypt(password),
-            },
-          });
 
-          const user = exclude<User, keyof User>(newUser as User, [
-            "password",
-            "deletedAt",
-          ]);
-
-          return res.status(StatusCodes.CREATED).json(user);
-        } catch (error) {
-          logger.error(error);
-          if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            if (error.code === "P2002") {
-              return res
-                .status(StatusCodes.CONFLICT)
-                .json({ message: "User using this email already exists" });
-            }
-          }
-          return res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ msg: "Something went wrong" });
-        }
-      }
-    );
     this.router.put(
       `${this.path}`,
       [requireUser, processRequestBody(updateUserSchema.body)],
