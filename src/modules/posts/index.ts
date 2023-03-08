@@ -11,6 +11,7 @@ import {
   createPostSchema,
   DeletePostBody,
   deletePostSchema,
+  GetUserPostsBody,
   UpdatePostBody,
   updatePostSchema,
 } from "./posts.schema";
@@ -27,9 +28,16 @@ class PostRoutes implements Routes {
     this.router.get(
       `${this.path}`,
       requireUser,
-      async (req: Request, res: Response) => {
+      async (
+        req: Request<{}, {}, {}, { authorId?: string | null }>,
+        res: Response
+      ) => {
+        const authorId = req.query.authorId;
         try {
           const posts = await req.prisma?.post.findMany({
+            where: {
+              authorId: authorId || undefined,
+            },
             include: {
               author: {
                 select: {
@@ -96,33 +104,6 @@ class PostRoutes implements Routes {
       }
     );
 
-    this.router.delete(
-      `${this.path}`,
-      [requireUser, processRequestBody(deletePostSchema.body)],
-      async (req: Request<{}, {}, DeletePostBody>, res: Response) => {
-        try {
-          const sessionUser = req.user;
-          const postId = req.body.id;
-          if (sessionUser) {
-            await req.prisma?.post.update({
-              where: {
-                id: postId,
-              },
-              data: {
-                deletedAt: new Date(),
-              },
-            });
-            return res.status(StatusCodes.OK).send();
-          }
-          return res.status(StatusCodes.FORBIDDEN).send();
-        } catch (error) {
-          logger.error(error);
-          return res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ msg: "Something went wrong" });
-        }
-      }
-    );
     this.router.put(
       `${this.path}`,
       [requireUser, processRequestBody(updatePostSchema.body)],
@@ -150,6 +131,34 @@ class PostRoutes implements Routes {
           });
 
           return res.status(StatusCodes.ACCEPTED).json(updatedPost);
+        } catch (error) {
+          logger.error(error);
+          return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ msg: "Something went wrong" });
+        }
+      }
+    );
+
+    this.router.delete(
+      `${this.path}`,
+      [requireUser, processRequestBody(deletePostSchema.body)],
+      async (req: Request<{}, {}, DeletePostBody>, res: Response) => {
+        try {
+          const sessionUser = req.user;
+          const postId = req.body.id;
+          if (sessionUser) {
+            await req.prisma?.post.update({
+              where: {
+                id: postId,
+              },
+              data: {
+                deletedAt: new Date(),
+              },
+            });
+            return res.status(StatusCodes.OK).send();
+          }
+          return res.status(StatusCodes.FORBIDDEN).send();
         } catch (error) {
           logger.error(error);
           return res

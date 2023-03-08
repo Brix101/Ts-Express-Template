@@ -27,6 +27,13 @@ export const deletePostSchema = {
   }),
 };
 
+export const getUserPostsSchema = {
+  body: object({
+    userId: string().nullish(),
+  }),
+};
+
 export type CreatePostBody = TypeOf<typeof createPostSchema.body>;
 export type UpdatePostBody = TypeOf<typeof updatePostSchema.body>;
 export type DeletePostBody = TypeOf<typeof deletePostSchema.body>;
+export type GetUserPostsBody = TypeOf<typeof getUserPostsSchema.body>;
