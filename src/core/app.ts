@@ -10,12 +10,13 @@ import { stream, logger } from "@/corelibs/Logger";
 import errorMiddleware from "@/coremiddlewares/error.middleware";
 import { Routes } from "@/modules/routes.interface";
 import { print } from "@/corelibs/RegisteredRoutesLogger";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 
 declare global {
   namespace Express {
     interface Request {
       prisma: PrismaClient | undefined;
+      user: User | undefined;
     }
   }
 }
@@ -37,7 +38,6 @@ class App {
 
   public listen() {
     // here you can start to work with your database
-    logger.info(`📦⚡⚡⚡ Database initialized`);
     this.app.listen(this.port, () => {
       logger.info(`=================================`);
       logger.info(`======= ENV: ${this.env} =======`);
@@ -76,7 +76,7 @@ class App {
 
   private initializeRoutes(routes: Routes[]) {
     routes.forEach((route) => {
-      this.app.use("/", route.router);
+      this.app.use("/api/v1", route.router);
     });
   }
 
