@@ -104,6 +104,21 @@ class AuthRoutes implements Routes {
         }
       }
     );
+    this.router.post(
+      `${this.path}logout`,
+      requireUser,
+      async (_: Request, res: Response) => {
+        try {
+          res.clearCookie("Authorization");
+          res.status(StatusCodes.ACCEPTED).send();
+        } catch (error) {
+          logger.error(error);
+          return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ msg: "Something went wrong" });
+        }
+      }
+    );
     this.router.get(
       `${this.path}me`,
       requireUser,
