@@ -8,9 +8,17 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import { stream, logger } from "@/corelibs/Logger";
 import errorMiddleware from "@/coremiddlewares/error.middleware";
-import { AppDataSource } from "@/corelibs/Database";
 import { Routes } from "@/modules/routes.interface";
 import { print } from "@/corelibs/RegisteredRoutesLogger";
+import { PrismaClient } from "@prisma/client";
+
+declare global {
+  namespace Express {
+    interface Request {
+      prisma: PrismaClient | undefined;
+    }
+  }
+}
 
 class App {
   public app: express.Application;
@@ -28,22 +36,18 @@ class App {
   }
 
   public listen() {
-    AppDataSource.initialize()
-      .then(() => {
-        // here you can start to work with your database
-        logger.info(`📦⚡⚡⚡ Database initialized`);
-        this.app.listen(this.port, () => {
-          logger.info(`=================================`);
-          logger.info(`======= ENV: ${this.env} =======`);
-          logger.info(`🚀 App listening on the port ${this.port}`);
-          logger.info(`=================================`);
-          // Log all registerd routes
-          logger.info(`======= REGISTERED ROUTES =======`);
-          this.app._router.stack.forEach(print.bind(null, []));
-          logger.info(`=================================`);
-        });
-      })
-      .catch((error) => logger.error(error));
+    // here you can start to work with your database
+    logger.info(`📦⚡⚡⚡ Database initialized`);
+    this.app.listen(this.port, () => {
+      logger.info(`=================================`);
+      logger.info(`======= ENV: ${this.env} =======`);
+      logger.info(`🚀 App listening on the port ${this.port}`);
+      logger.info(`=================================`);
+      // Log all registerd routes
+      logger.info(`======= REGISTERED ROUTES =======`);
+      this.app._router.stack.forEach(print.bind(null, []));
+      logger.info(`=================================`);
+    });
   }
 
   public getServer() {
@@ -59,6 +63,15 @@ class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
+    this.app.use((req, _, next) => {
+      req.prisma = new PrismaClient({
+        log:
+          env.NODE_ENV === "development"
+            ? ["query", "error", "warn"]
+            : ["error"],
+      });
+      next();
+    });
   }
 
   private initializeRoutes(routes: Routes[]) {
