@@ -11,12 +11,13 @@ import errorMiddleware from "@/coremiddlewares/error.middleware";
 import { Routes } from "@/modules/routes.interface";
 import { print } from "@/corelibs/RegisteredRoutesLogger";
 import { PrismaClient, User } from "@prisma/client";
+import prisma from "@/core/libs/Prisma";
 
 declare global {
   namespace Express {
     interface Request {
       prisma: PrismaClient | undefined;
-      user: User | undefined;
+      user: Partial<User> | undefined;
     }
   }
 }
@@ -55,7 +56,7 @@ class App {
   }
 
   private initializeMiddlewares() {
-    this.app.use(morgan(env.LOG_FORMAT || "debug", { stream }));
+    this.app.use(morgan(env.LOG_FORMAT, { stream }));
     this.app.use(cors({ origin: env.ORIGIN, credentials: true }));
     this.app.use(hpp());
     this.app.use(helmet());
@@ -64,12 +65,7 @@ class App {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
     this.app.use((req, _, next) => {
-      req.prisma = new PrismaClient({
-        log:
-          env.NODE_ENV === "development"
-            ? ["query", "error", "warn"]
-            : ["error"],
-      });
+      req.prisma = prisma;
       next();
     });
   }
