@@ -36,7 +36,7 @@ function print(path: string[], layer: Layer) {
     const newPath = method + joinedPath;
 
     if (oldPath !== newPath) {
-      logger.warn(`➡️[${method}]  /${joinedPath}`);
+      logger.info(`➡️[${method}]  /${joinedPath}`);
       oldPath = newPath;
     }
   }

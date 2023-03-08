@@ -3,19 +3,14 @@ import { logger } from "@/core/libs/Logger";
 import { Router, Request, Response } from "express";
 import { Routes } from "../routes.interface";
 import { Prisma, User } from "@prisma/client";
-import {
-  RegisterUserBody,
-  registerUserSchema,
-  UpdateUserBody,
-  updateUserSchema,
-} from "./users.schema";
+import { RegisterUserBody, registerUserSchema } from "./users.schema";
 import { StatusCodes } from "http-status-codes";
 import { processRequestBody } from "zod-express-middleware";
 import { exclude } from "@/core/libs/PrismaExclude";
 import requireUser from "@/core/middlewares/requiredUser.middleware";
 
-class UserRoutes implements Routes {
-  public path = "/users";
+class IndexRoutes implements Routes {
+  public path = "/posts";
   public router = Router();
 
   constructor() {
@@ -23,21 +18,6 @@ class UserRoutes implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get(
-      `${this.path}`,
-      requireUser,
-      async (req: Request, res: Response) => {
-        try {
-          const users = await req.prisma?.user.findMany();
-          res.send(users);
-        } catch (error) {
-          logger.error(error);
-          return res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ msg: "Something went wrong" });
-        }
-      }
-    );
     this.router.post(
       `${this.path}`,
       processRequestBody(registerUserSchema.body),
@@ -73,32 +53,13 @@ class UserRoutes implements Routes {
         }
       }
     );
-    this.router.put(
+    this.router.get(
       `${this.path}`,
-      [requireUser, processRequestBody(updateUserSchema.body)],
-      async (req: Request<{}, {}, UpdateUserBody>, res: Response) => {
+      requireUser,
+      async (req: Request, res: Response) => {
         try {
-          const sessionUser = req.user;
-          const { name, email, password } = req.body;
-          if (sessionUser) {
-            const updatedUser = await req.prisma?.user.update({
-              where: {
-                id: sessionUser.id,
-              },
-              data: {
-                name: name || undefined,
-                email: email || undefined,
-                password: password ? await Argon.encrypt(password) : undefined,
-              },
-            });
-            const user = exclude<User, keyof User>(updatedUser as User, [
-              "password",
-              "deletedAt",
-            ]);
-
-            return res.status(StatusCodes.ACCEPTED).json(user);
-          }
-          return res.status(StatusCodes.FORBIDDEN).send();
+          const users = await req.prisma?.user.findMany();
+          res.send(users);
         } catch (error) {
           logger.error(error);
           return res
@@ -138,7 +99,32 @@ class UserRoutes implements Routes {
         }
       }
     );
+    this.router.put(`${this.path}`, requireUser, async (req, res) => {
+      try {
+        const sessionUser = req.user;
+        if (sessionUser) {
+          const updatedUser = await req.prisma?.user.update({
+            where: {
+              id: sessionUser.id,
+            },
+            data: {},
+          });
+          const user = exclude<User, keyof User>(updatedUser as User, [
+            "password",
+            "deletedAt",
+          ]);
+
+          return res.status(StatusCodes.ACCEPTED).json(user);
+        }
+        return res.status(StatusCodes.FORBIDDEN).send();
+      } catch (error) {
+        logger.error(error);
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json({ msg: "Something went wrong" });
+      }
+    });
   }
 }
 
-export default UserRoutes;
+export default IndexRoutes;
