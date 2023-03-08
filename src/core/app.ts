@@ -11,7 +11,8 @@ import errorMiddleware from "@/coremiddlewares/error.middleware";
 import { Routes } from "@/modules/routes.interface";
 import { print } from "@/corelibs/RegisteredRoutesLogger";
 import { PrismaClient, User } from "@prisma/client";
-import prisma from "@/core/libs/Prisma";
+import prisma from "@/corelibs/Prisma";
+import { deserializeUser } from "./libs/DeserializeUser";
 
 declare global {
   namespace Express {
@@ -65,9 +66,10 @@ class App {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
     this.app.use((req, _, next) => {
-      req.prisma = prisma;
+      req.prisma = req.prisma || prisma;
       next();
     });
+    this.app.use(deserializeUser);
   }
 
   private initializeRoutes(routes: Routes[]) {

@@ -11,6 +11,8 @@ let envSchema = z.object({
   LOG_FORMAT: z.string().default("dev"),
   SECRET_KEY: z.string(),
   ORIGIN: z.string(),
+  PRIVATE_KEY: z.string(),
+  PUBLIC_KEY: z.string(),
 });
 
 let _serverEnv = envSchema.safeParse(process.env);

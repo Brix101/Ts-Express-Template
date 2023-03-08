@@ -7,6 +7,7 @@ import { RegisterUserBody, registerUserSchema } from "./users.schema";
 import { StatusCodes } from "http-status-codes";
 import { processRequestBody } from "zod-express-middleware";
 import { exclude } from "@/core/libs/PrismaExclude";
+import requireUser from "@/core/middlewares/requiredUser.middleware";
 
 class IndexRoutes implements Routes {
   public path = "/users";
@@ -52,45 +53,53 @@ class IndexRoutes implements Routes {
         }
       }
     );
-    this.router.get(`${this.path}`, async (req: Request, res: Response) => {
-      try {
-        const users = await req.prisma?.user.findMany();
-        res.send(users);
-      } catch (error) {
-        logger.error(error);
-        res
-          .status(StatusCodes.INTERNAL_SERVER_ERROR)
-          .json({ msg: "Something went wrong" });
-      }
-    });
-    this.router.delete(`${this.path}/:id`, async (req, res) => {
-      try {
-        const sessionUser = req.user;
-        if (sessionUser) {
-          const deletedUser = await req.prisma?.user.update({
-            where: {
-              id: sessionUser.id,
-            },
-            data: {
-              deletedAt: new Date(),
-            },
-          });
-
-          const user = exclude<User, keyof User>(deletedUser as User, [
-            "password",
-          ]);
-
-          return res.status(StatusCodes.OK).json(user);
+    this.router.get(
+      `${this.path}`,
+      requireUser,
+      async (req: Request, res: Response) => {
+        try {
+          const users = await req.prisma?.user.findMany();
+          res.send(users);
+        } catch (error) {
+          logger.error(error);
+          return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ msg: "Something went wrong" });
         }
-        return res.status(StatusCodes.FORBIDDEN).send();
-      } catch (error) {
-        logger.error(error);
-        res
-          .status(StatusCodes.INTERNAL_SERVER_ERROR)
-          .json({ msg: "Something went wrong" });
       }
-    });
-    this.router.put(`${this.path}`, async (req, res) => {
+    );
+    this.router.delete(
+      `${this.path}`,
+      requireUser,
+      async (req: Request, res: Response) => {
+        try {
+          const sessionUser = req.user;
+          if (sessionUser) {
+            const deletedUser = await req.prisma?.user.update({
+              where: {
+                id: sessionUser.id,
+              },
+              data: {
+                deletedAt: new Date(),
+              },
+            });
+
+            const user = exclude<User, keyof User>(deletedUser as User, [
+              "password",
+            ]);
+
+            return res.status(StatusCodes.OK).json(user);
+          }
+          return res.status(StatusCodes.FORBIDDEN).send();
+        } catch (error) {
+          logger.error(error);
+          return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ msg: "Something went wrong" });
+        }
+      }
+    );
+    this.router.put(`${this.path}`, requireUser, async (req, res) => {
       try {
         const sessionUser = req.user;
         if (sessionUser) {
@@ -110,7 +119,7 @@ class IndexRoutes implements Routes {
         return res.status(StatusCodes.FORBIDDEN).send();
       } catch (error) {
         logger.error(error);
-        res
+        return res
           .status(StatusCodes.INTERNAL_SERVER_ERROR)
           .json({ msg: "Something went wrong" });
       }
