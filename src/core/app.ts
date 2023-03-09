@@ -2,6 +2,7 @@ import { Routes } from "@/coreinterfaces/routes.interface";
 import { deserializeUser } from "@/corelibs/DeserializeUser";
 import { env } from "@/corelibs/Env";
 import { logger, stream } from "@/corelibs/Logger";
+import { startMetricsServer } from "@/corelibs/Metrics";
 import prisma from "@/corelibs/Prisma";
 import { print } from "@/corelibs/RegisteredRoutesLogger";
 import errorMiddleware from "@/coremiddlewares/error.middleware";
@@ -13,6 +14,8 @@ import express from "express";
 import helmet from "helmet";
 import hpp from "hpp";
 import morgan from "morgan";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 declare global {
   namespace Express {
@@ -35,6 +38,8 @@ class App {
 
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
+    this.initializeMetric();
+    this.initializeSwagger();
     this.initializeErrorHandling();
   }
 
@@ -70,6 +75,57 @@ class App {
       next();
     });
     this.app.use(deserializeUser);
+  }
+
+  private initializeMetric() {
+    startMetricsServer();
+  }
+  private initializeSwagger() {
+    // const options: swaggerJsdoc.Options = {
+    //   definition: {
+    //     openapi: "3.0.0",
+    //     info: {
+    //       title: name + " Docs",
+    //       version,
+    //     },
+    //     components: {
+    //       securitySchemas: {
+    //         bearerAuth: {
+    //           type: "http",
+    //           scheme: "bearer",
+    //           bearerFormat: "JWT",
+    //         },
+    //       },
+    //     },
+    //     security: [
+    //       {
+    //         bearerAuth: [],
+    //       },
+    //     ],
+    //   },
+    //   apis: ["../../modules/**/*.yaml"],
+    // };
+    const options = {
+      swaggerDefinition: {
+        info: {
+          title: "REST API",
+          version: "1.0.0",
+          description: "Example docs",
+        },
+      },
+      apis: ["swagger.yaml"],
+    };
+
+    const swaggerSpec = swaggerJsdoc(options);
+    // Swagger page
+    this.app.use("/api-docs", swaggerUi.serve);
+    this.app.get("/api-docs", swaggerUi.setup(swaggerSpec));
+
+    // // Docs in JSON format
+    // this.app.get("/api-docs.json", (req: Request, res: Response) => {
+    //   res.setHeader("Content-Type", "text/html; charset=utf-8");
+    //   res.send(swaggerSpec);
+    // });
   }
 
   private initializeRoutes(routes: Routes[]) {
