@@ -1,13 +1,13 @@
-import { Argon } from "@/core/libs/Argon";
-import { logger } from "@/core/libs/Logger";
-import { exclude } from "@/core/libs/PrismaExclude";
-import { generateJWT } from "@/core/libs/Token";
-import requireUser from "@/core/middlewares/requiredUser.middleware";
+import { Routes } from "@/coreinterfaces/routes.interface";
+import { Argon } from "@/corelibs/Argon";
+import { logger } from "@/corelibs/Logger";
+import { exclude } from "@/corelibs/Prisma";
+import { generateJWT } from "@/corelibs/Token";
+import requireUser from "@/coremiddlewares/requiredUser.middleware";
 import { Prisma, User } from "@prisma/client";
 import { CookieOptions, Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { processRequestBody } from "zod-express-middleware";
-import { Routes } from "../routes.interface";
 import { SignInBody, SignUpBody, signUpSchema } from "./auth.schema";
 
 class AuthRoutes implements Routes {

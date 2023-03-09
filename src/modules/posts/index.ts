@@ -1,17 +1,16 @@
-import { logger } from "@/core/libs/Logger";
-import { Router, Request, Response } from "express";
-import { Routes } from "../routes.interface";
-import { Post, Prisma, User } from "@prisma/client";
+import { Routes } from "@/core/interfaces/routes.interface";
+import { exclude } from "@/core/libs/Prisma";
+import { logger } from "@/corelibs/Logger";
+import requireUser from "@/coremiddlewares/requiredUser.middleware";
+import { Post, Prisma } from "@prisma/client";
+import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { processRequestBody } from "zod-express-middleware";
-import { exclude } from "@/core/libs/PrismaExclude";
-import requireUser from "@/core/middlewares/requiredUser.middleware";
 import {
   CreatePostBody,
   createPostSchema,
   DeletePostBody,
   deletePostSchema,
-  GetUserPostsBody,
   UpdatePostBody,
   updatePostSchema,
 } from "./posts.schema";

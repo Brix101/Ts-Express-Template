@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { env } from "@/corelibs/Env";
 import { User } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { env } from "./Env";
 
 declare module "jsonwebtoken" {
   export interface JwtPayload {

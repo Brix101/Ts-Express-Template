@@ -1,5 +1,5 @@
+import { env } from "@/corelibs/Env";
 import { PrismaClient } from "@prisma/client";
-import { env } from "./Env";
 
 const prisma = new PrismaClient({
   log: env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
@@ -10,5 +10,15 @@ const prisma = new PrismaClient({
 //   console.log("Params: " + e.params);
 //   console.log("Duration: " + e.duration + "ms");
 // });
+
+export function exclude<T, Key extends keyof T>(
+  obj: T,
+  keys: Key[]
+): Omit<T, Key> {
+  for (let key of keys) {
+    delete obj[key];
+  }
+  return obj;
+}
 
 export default prisma;
