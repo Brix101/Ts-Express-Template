@@ -8,7 +8,12 @@ import { Prisma, User } from "@prisma/client";
 import { CookieOptions, Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { processRequestBody } from "zod-express-middleware";
-import { SignInBody, SignUpBody, signUpSchema } from "./auth.schema";
+import {
+  SignInBody,
+  signInSchema,
+  SignUpBody,
+  signUpSchema,
+} from "./auth.schema";
 
 class AuthRoutes implements Routes {
   public path = "/";
@@ -21,6 +26,7 @@ class AuthRoutes implements Routes {
   private initializeRoutes() {
     this.router.post(
       `${this.path}signin`,
+      processRequestBody(signInSchema.body),
       async (req: Request<{}, {}, SignInBody>, res: Response) => {
         try {
           const { email, password } = req.body;
