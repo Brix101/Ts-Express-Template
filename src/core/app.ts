@@ -1,18 +1,20 @@
-import express from "express";
+import { Routes } from "@/coreinterfaces/routes.interface";
+import { deserializeUser } from "@/corelibs/DeserializeUser";
 import { env } from "@/corelibs/Env";
-import cors from "cors";
-import hpp from "hpp";
-import compression from "compression";
-import helmet from "helmet";
-import cookieParser from "cookie-parser";
-import morgan from "morgan";
-import { stream, logger } from "@/corelibs/Logger";
-import errorMiddleware from "@/coremiddlewares/error.middleware";
-import { Routes } from "@/modules/routes.interface";
-import { print } from "@/corelibs/RegisteredRoutesLogger";
-import { PrismaClient, User } from "@prisma/client";
+import { logger, stream } from "@/corelibs/Logger";
+import { startMetricsServer } from "@/corelibs/Metrics";
 import prisma from "@/corelibs/Prisma";
-import { deserializeUser } from "./libs/DeserializeUser";
+import { print } from "@/corelibs/RegisteredRoutesLogger";
+import swaggerDocs from "@/corelibs/Swagger";
+import errorMiddleware from "@/coremiddlewares/error.middleware";
+import { PrismaClient, User } from "@prisma/client";
+import compression from "compression";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express from "express";
+import helmet from "helmet";
+import hpp from "hpp";
+import morgan from "morgan";
 
 declare global {
   namespace Express {
@@ -35,6 +37,8 @@ class App {
 
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
+    this.initializeMetric();
+    this.initializeSwagger();
     this.initializeErrorHandling();
   }
 
@@ -70,6 +74,13 @@ class App {
       next();
     });
     this.app.use(deserializeUser);
+  }
+
+  private initializeMetric() {
+    startMetricsServer();
+  }
+  private initializeSwagger() {
+    swaggerDocs(this.app, this.port);
   }
 
   private initializeRoutes(routes: Routes[]) {

@@ -1,6 +1,6 @@
-import { readdirSync, readdir } from "fs";
+import { Routes } from "@/coreinterfaces/routes.interface";
+import { readdirSync } from "fs";
 import path from "path";
-import { Routes } from "./routes.interface";
 
 const PATH_ROUTER = `${__dirname}`;
 

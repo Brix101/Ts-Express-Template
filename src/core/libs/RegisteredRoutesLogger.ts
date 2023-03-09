@@ -1,4 +1,4 @@
-import { logger } from "./Logger";
+import { logger } from "@/corelibs/Logger";
 
 interface Route {
   path: string;

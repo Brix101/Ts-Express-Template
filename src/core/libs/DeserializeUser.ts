@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
+import { verifyToken } from "@/corelibs/Token";
+import { NextFunction, Request, Response } from "express";
 import { get } from "lodash";
-import { verifyToken } from "./Token";
 
 export function deserializeUser(req: Request, _: Response, next: NextFunction) {
   const Authorization =
