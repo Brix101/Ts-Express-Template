@@ -1,115 +1,115 @@
 tags:
-- name: users
-  description: users API
+  - name: users
+    description: users API
 
 paths:
-# [GET] users
+  # [GET] users
   /users:
     get:
       tags:
-      - users
+        - users
       summary: Find All Users
       responses:
         200:
-          description: 'OK'
+          description: "OK"
         500:
-          description: 'Server Error'
+          description: "Server Error"
 
-# [POST] users
+    # [POST] users
     post:
       tags:
-      - users
+        - users
       summary: Add User
       parameters:
-      - name: body
-        in: body
-        description: user Data
-        required: true
-        schema:
-          $ref: '#/definitions/users'
+        - name: body
+          in: body
+          description: user Data
+          required: true
+          schema:
+            $ref: "#/definitions/users"
       responses:
         201:
-          description: 'Created'
+          description: "Created"
         400:
-          description: 'Bad Request'
+          description: "Bad Request"
         409:
-          description: 'Conflict'
+          description: "Conflict"
         500:
-          description: 'Server Error'
+          description: "Server Error"
 
-# [GET] users/id
+  # [GET] users/id
   /users/{id}:
     get:
       tags:
-      - users
+        - users
       summary: Find User By Id
       parameters:
-      - name: id
-        in: path
-        description: User Id
-        required: true
-        type: integer
+        - name: id
+          in: path
+          description: User Id
+          required: true
+          type: integer
       responses:
         200:
-          description: 'OK'
+          description: "OK"
         409:
-          description: 'Conflict'
+          description: "Conflict"
         500:
-          description: 'Server Error'
+          description: "Server Error"
 
-# [PUT] users/id
+    # [PUT] users/id
     put:
       tags:
-      - users
+        - users
       summary: Update User By Id
       parameters:
-      - name: id
-        in: path
-        description: user Id
-        required: true
-        type: integer
-      - name: body
-        in: body
-        description: user Data
-        required: true
-        schema:
-          $ref: '#/definitions/users'
+        - name: id
+          in: path
+          description: user Id
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: user Data
+          required: true
+          schema:
+            $ref: "#/definitions/users"
       responses:
         200:
-          description: 'OK'
+          description: "OK"
         400:
-          description: 'Bad Request'
+          description: "Bad Request"
         409:
-          description: 'Conflict'
+          description: "Conflict"
         500:
-          description: 'Server Error'
+          description: "Server Error"
 
-# [DELETE] users/id
+    # [DELETE] users/id
     delete:
       tags:
-      - users
+        - users
       summary: Delete User By Id
       parameters:
-      - name: id
-        in: path
-        description: user Id
-        required: true
-        type: integer
+        - name: id
+          in: path
+          description: user Id
+          required: true
+          type: integer
       responses:
         200:
-          description: 'OK'
+          description: "OK"
         409:
-          description: 'Conflict'
+          description: "Conflict"
         500:
-          description: 'Server Error'
+          description: "Server Error"
 
 # definitions
 definitions:
   users:
     type: object
     required:
-        - email
-        - password
+      - email
+      - password
     properties:
       email:
         type: string
@@ -119,5 +119,40 @@ definitions:
         description: user Password
 
 schemes:
- - https
- - http
+  - https
+  - http
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: st
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: theUser
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: "12345"
+        phone:
+          type: string
+          example: "12345"
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
+          example: 1
+      xml:
+        name: user
